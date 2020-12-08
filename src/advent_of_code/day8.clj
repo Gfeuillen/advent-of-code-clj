@@ -20,18 +20,18 @@
   (def new-insts
     (merge insts {idx (merge c-i {:ex true})})
     )
-  (if (or (get c-i :ex) (>= idx (count insts)))
+  (if (or (:ex c-i) (>= idx (count insts)))
     acc
-    (case (get c-i :op)
+    (case (:op c-i)
       "nop" (ex-prog acc
                      (+ idx 1)
                      (get insts (+ idx 1))
                      new-insts)
       "jmp" (ex-prog acc
-                     (+ idx (get c-i :num))
-                     (get insts (+ idx (get c-i :num)))
+                     (+ idx (:num c-i))
+                     (get insts (+ idx (:num c-i)))
                      new-insts)
-      "acc" (ex-prog (+ acc (get c-i :num))
+      "acc" (ex-prog (+ acc (:num c-i))
                      (+ idx 1)
                      (get insts (+ idx 1))
                      new-insts)
@@ -45,9 +45,9 @@
     )
   (if (and (= idx (count insts)) (= (- idx last-idx) 1))    ;if we are at last instruction + 1
     true
-    (if (or (>= idx (count insts)) (get c-i :ex))           ;if the program can't execute anymore
+    (if (or (>= idx (count insts)) (:ex c-i))           ;if the program can't execute anymore
       false
-      (case (get c-i :op)
+      (case (:op c-i)
         "nop" (is-ex-prog acc
                           idx
                           (+ idx 1)
@@ -55,10 +55,10 @@
                           new-insts)
         "jmp" (is-ex-prog acc
                           idx
-                          (+ idx (get c-i :num))
-                          (get insts (+ idx (get c-i :num)))
+                          (+ idx (:num c-i))
+                          (get insts (+ idx (:num c-i)))
                           new-insts)
-        "acc" (is-ex-prog (+ acc (get c-i :num))
+        "acc" (is-ex-prog (+ acc (:num c-i))
                           idx
                           (+ idx 1)
                           (get insts (+ idx 1))
