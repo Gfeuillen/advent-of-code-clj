@@ -5,6 +5,12 @@
   (:require [clojure.set])
   (:require [clojure.core.reducers :as r]))
 
+(defn read-lines [file-name]
+  (let [res (io/resource file-name)]
+    (str/split (slurp res) #"\n")
+    )
+  )
+
 (defn parse-line [line]
   (let [instr (first line)
         n (apply str (rest line))]
@@ -27,31 +33,33 @@
       ))
   )
 
-(defn execute-prog [instrs d dy dx]
-  (println (list d dy dx))
-  (if (empty? instrs)
-    (+ (abs dy) (abs dx))
-    (let [c-i (first instrs)
-          i (:instr c-i)
-          nm (:n c-i)]
-      (case i
-        \N (execute-prog (rest instrs) d (+ dy nm) dx)
-        \S (execute-prog (rest instrs) d (- dy nm) dx)
-        \E (execute-prog (rest instrs) d dy (+ dx nm))
-        \W (execute-prog (rest instrs) d dy (- dx nm))
-        \L (execute-prog (rest instrs) (+ d nm) dy dx)
-        \R (execute-prog (rest instrs) (- d nm) dy dx)
-        \F (execute-prog (conj (rest instrs)
-                               {:instr (degree-to-dir d)
-                                :n     nm}) d dy dx)
-        ))
-    )
+(defn execute-prog [instrs]
+  (loop [instructions instrs
+         degrees 0
+         change-y 0
+         change-x 0]
+    (if (empty? instructions)
+      (+ (abs change-x) (abs change-y))
+      (let [instruction (first instructions)
+            rest-instr (rest instructions)
+            num (:n instruction)]
+        (case (:instr instruction)
+          \N (recur rest-instr degrees (+ change-y num) change-x)
+          \S (recur rest-instr degrees (- change-y num) change-x)
+          \E (recur rest-instr degrees change-y (+ change-x num))
+          \W (recur rest-instr degrees change-y (- change-x num))
+          \L (recur rest-instr (+ degrees num) change-y change-x)
+          \R (recur rest-instr (- degrees num) change-y change-x)
+          \F (recur (conj rest-instr
+                                 {:instr (degree-to-dir degrees)
+                                  :n     num}) degrees change-y change-x)
+          ))
+      ))
 
   )
 
 
 (defn execute-prog-2 [instrs d wy wx dy dx]
-  (println (list d wy wx dy dx))
   (if (empty? instrs)
     (+ (abs dy) (abs dx))
     (let [c-i (first instrs)
@@ -66,8 +74,7 @@
              90 (execute-prog-2 (rest instrs) d wx (- wy) dy dx)
              180 (execute-prog-2 (rest instrs) d (- wy) (- wx) dy dx)
              270 (execute-prog-2 (rest instrs) d (- wx) wy dy dx)
-             (execute-prog-2 (rest instrs) d wy wx dy dx)
-             )
+             (execute-prog-2 (rest instrs) d wy wx dy dx))
         \R (execute-prog-2 (conj (rest instrs)
                                  {:instr \L
                                   :n     (abs (- 360 nm))}) d wy wx dy dx)
@@ -78,10 +85,9 @@
 
 (defn -main
   [& args]
-  (let [input-file (io/resource "inputday12.txt")
-        lines (str/split (slurp input-file) #"\n")
+  (let [lines (read-lines "inputday12.txt")
         input (map parse-line lines)]
-    (println (execute-prog input 0 0 0))
+    (println (execute-prog input))
     (println (execute-prog-2 input 0 1 10 0 0))
     )
   )
