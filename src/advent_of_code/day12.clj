@@ -85,9 +85,10 @@
 
 (defn -main
   [& args]
-  (let [lines (read-lines "inputday12.txt")
+  (let [sol-1 (comp execute-prog (partial map parse-line) read-lines)
+        lines (read-lines "inputday12.txt")
         input (map parse-line lines)]
-    (println (execute-prog input))
+    (println (sol-1 "inputday12.txt"))
     (println (execute-prog-2 input 0 1 10 0 0))
     )
   )
