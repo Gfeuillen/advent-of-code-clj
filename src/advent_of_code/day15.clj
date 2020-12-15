@@ -14,10 +14,7 @@
     (let [last-seen-i (get mem current)
           diff (- i last-seen-i)
           new-mem (assoc mem current i)]
-      (lazy-seq (cons diff (infinite-play new-mem diff (inc i))))
-      )
-    )
-  )
+      (lazy-seq (cons diff (infinite-play new-mem diff (inc i)))))))
 
 (defn sol-1 [input n]
   (if (<= n (count input))
@@ -27,8 +24,7 @@
         (apply merge (map-indexed (fn [i v] {v i}) (drop-last input)))
         (last input)
         (dec (count input)))
-      (- n (inc (count input)))))
-  )
+      (- n (inc (count input))))))
 
 (defn -main
   [& args]
@@ -36,5 +32,5 @@
   (println (sol-1 [2 1 3] 2020))
   (println (sol-1 [1 2 3] 2020))
   (println (sol-1 [20 0 1 11 6 3] 2020))                    ;part 1
-  (println (sol-1 [20 0 1 11 6 3] 30000000))                ;part 2, same solution works
+  (println (time (sol-1 [20 0 1 11 6 3] 30000000)))         ;part 2, same solution works
   )
